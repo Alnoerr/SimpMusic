@@ -544,6 +544,7 @@ if (getPlatform() == Platform.Android) {
 
 ### Build Configuration (2026-10-31)
 - **AGP 9.4.1 pinned**: AGP 9.5 registers Compose Preview runfile tasks for release variants whose unit-test components are disabled, causing CI configuration to fail. The Android app keeps `unitTests.isIncludeAndroidResources = true`; the older AGP avoids realizing the incompatible release preview tasks.
+- **Desktop CI builds Windows only (2026-11-01)**: the push/dispatch desktop packaging workflow now runs only Conveyor's `windows.amd64` target and uploads the Windows offline installer; Linux AppImage and macOS zip/DMG jobs were removed from that workflow.
 
 ### Architecture Changes
 - **Desktop: GStreamer → VLCJ**: Completely replaced GStreamer with VLCJ for desktop audio playback
