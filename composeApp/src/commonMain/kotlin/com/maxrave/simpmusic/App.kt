@@ -96,7 +96,6 @@ import com.maxrave.simpmusic.ui.navigation.destination.player.FullscreenDestinat
 import com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination
 import com.maxrave.simpmusic.ui.navigation.graph.AppNavigationGraph
 import com.maxrave.simpmusic.ui.screen.MiniPlayer
-import com.maxrave.simpmusic.ui.screen.other.UnofficialBuildScreen
 import com.maxrave.simpmusic.ui.screen.player.NowPlayingScreen
 import com.maxrave.simpmusic.ui.screen.player.NowPlayingScreenContent
 import com.maxrave.simpmusic.ui.theme.AppTheme
@@ -173,7 +172,6 @@ fun App(
     val themeMode by viewModel.getThemeMode().collectAsStateWithLifecycle(DataStoreManager.THEME_MODE_DARK)
     val themeColorSource by viewModel.getThemeColorSource().collectAsStateWithLifecycle(DataStoreManager.THEME_COLOR_DEFAULT)
     val customThemeColorHex by viewModel.getCustomThemeColor().collectAsStateWithLifecycle(DataStoreManager.DEFAULT_THEME_COLOR_HEX)
-    val isOfficialBuild by viewModel.isOfficialBuild.collectAsStateWithLifecycle()
     // MiniPlayer visibility: derived, never stored.
     //
     // This used to be a rememberSaveable Boolean written by a LaunchedEffect. Two things went
@@ -509,10 +507,6 @@ fun App(
         // The setting governs Desktop too, the same as Android: off, every glass surface draws flat.
         liquidGlassEnabled = isLiquidGlassEnabled == TRUE,
     ) {
-        if (!isOfficialBuild) {
-            UnofficialBuildScreen()
-            return@AppTheme
-        }
         // Read inside AppTheme so MaterialTheme reflects the resolved scheme.
         val isLightScheme = MaterialTheme.colorScheme.background.luminance() > 0.5f
 
