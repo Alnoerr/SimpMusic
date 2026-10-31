@@ -346,9 +346,10 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
                 exitApplication()
             }
         }
-        // Windows and Linux keep the native title bar (on Linux, undecorated + transparent
-        // breaks on some distros/WMs). Only macOS draws the custom one.
-        val nativeTitleBar = !isMacOS
+        // Linux keeps the native title bar because undecorated + transparent breaks on some
+        // distros/WMs. Windows and macOS use the custom title bar.
+        val isWindows = System.getProperty("os.name", "").contains("Windows", ignoreCase = true)
+        val nativeTitleBar = !isMacOS && !isWindows
         // Publish whether the custom title bar will be mounted so getScreenSizeInfo() can
         // subtract the 40dp strip it occupies above the content (see DesktopWindowChrome).
         LaunchedEffect(nativeTitleBar) {
