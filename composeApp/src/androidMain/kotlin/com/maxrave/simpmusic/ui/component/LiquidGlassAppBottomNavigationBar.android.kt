@@ -198,6 +198,9 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 launchSingleTop = true
                 restoreState = true
             }
+            if (screen == BottomNavScreen.Search) {
+                reloadDestinationIfNeeded(SearchDestination::class)
+            }
         }
     }
 
