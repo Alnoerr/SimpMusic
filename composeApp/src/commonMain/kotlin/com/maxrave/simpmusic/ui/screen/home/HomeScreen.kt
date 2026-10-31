@@ -449,31 +449,6 @@ fun HomeScreen(
             }
         }
     }
-    LaunchedEffect(openAppTime, shareLyricsPermissions) {
-        Logger.w("HomeScreen", "openAppTime: $openAppTime, shareLyricsPermissions: $shareLyricsPermissions")
-        if (openAppTime >= 10 && openAppTime % 10 == 0 && openAppTime <= 50) {
-            showReviewDialog = true
-        } else if ((openAppTime == 1 || openAppTime % 15 == 0) && openAppTime <= 60 && !shareLyricsPermissions) {
-            showRequestShareLyricsPermissions = true
-        } else if (openAppTime == 5) {
-            // Blog promo: one-shot after 5 app opens, bump key suffix to re-promote later
-            if (sharedViewModel.getString(BLOG_PROMO_KEY) != "true") {
-                showBlogPromoDialog = true
-            }
-        } else if (openAppTime % 10 == 6 &&
-            openAppTime <= 46 &&
-            sharedViewModel.getString(FOOTGUNS_STAR_KEY) != "true"
-        ) {
-            // kotlin-footguns star prompt: 6, 16, 26, 36, 46 - one open after each review milestone,
-            // and clear of the share-lyrics (15, 45) and blog-promo (5) milestones
-            showFootgunsDialog = true
-        } else {
-            showReviewDialog = false
-            showFootgunsDialog = false
-            showRequestShareLyricsPermissions = false
-        }
-    }
-
     val shouldStartPaginate =
         remember {
             derivedStateOf {
@@ -572,50 +547,6 @@ fun HomeScreen(
     val otherDialogOpen =
         appDialogOpen || showReviewDialog || showRequestShareLyricsPermissions || showBlogPromoDialog ||
             showFootgunsDialog || shouldShowLogInAlert
-    // The launch banner, decided once per launch. It waits for Home to settle on its own dialogs (the
-    // open count and the lyrics-sharing flag load just after the first frame) and for the update check
-    // started at launch, however long that takes, so an update dialog comes first. Then it takes the
-    // first banner this version has not shown yet.
-    LaunchedEffect(Unit) {
-        if (promoLaunchDecided) return@LaunchedEffect
-        // Marked at the start, not the end: leaving Home cancels this for good (by then the user is
-        // busy elsewhere), and a value written while Home is being left would not be saved.
-        promoLaunchDecided = true
-        snapshotFlow { openAppTime }.first { it > 0 }
-        delay(PROMO_SETTLE_MS)
-        sharedViewModel.isCheckingUpdate.first { !it }
-        if (userStarted) {
-            Logger.i("Promo", "Skipped: the user started before the banner's turn")
-            return@LaunchedEffect
-        }
-        val localTracking = sharedViewModel.getLocalTrackingEnabled().first() == TRUE
-        val youTubeLoggedIn = sharedViewModel.getYouTubeLoggedIn().first() == TRUE
-        val shown = sharedViewModel.shownPromos()
-        val promos = sharedViewModel.cachedPromos().first()
-        val os = osRequirementOf(getPlatform().osName())
-        val eligible = eligiblePromos(promos, VersionManager.getVersionName(), language, localTracking, youTubeLoggedIn, os)
-        val banner =
-            eligible
-                .firstOrNull { (promo, _) -> promo.id.orEmpty() !in shown }
-                ?.let { (promo, url) -> PromoBannerData(id = promo.id.orEmpty(), imageUrl = url, link = promo.link.orEmpty()) }
-        when {
-            banner == null ->
-                Logger.i(
-                    "Promo",
-                    "Nothing to show: ${eligible.size} of ${promos.size} banners usable here " +
-                        "(local tracking ${if (localTracking) "on" else "off"}, " +
-                        "YouTube ${if (youTubeLoggedIn) "signed in" else "signed out"}), " +
-                        "already shown in ${VersionManager.getVersionName()}: $shown",
-                )
-
-            userStarted -> Logger.i("Promo", "Skipped ${banner.id}: the user started before its turn")
-
-            else -> {
-                Logger.i("Promo", "Picked ${banner.id}, waiting for its turn")
-                promoBanner = banner
-            }
-        }
-    }
     // Everything that keeps the banner off screen: any other dialog (it waits its turn behind them),
     // Now Playing, and Home not being in front. On Desktop that only asks for a showing window: one
     // opened from a terminal or an IDE may start without focus, and the click that focuses it would
