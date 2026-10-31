@@ -542,6 +542,9 @@ if (getPlatform() == Platform.Android) {
 
 ## 📜 Changelog Summary (post-1.0.4)
 
+### Build Configuration (2026-10-31)
+- **AGP 9.4.1 pinned**: AGP 9.5 registers Compose Preview runfile tasks for release variants whose unit-test components are disabled, causing CI configuration to fail. The Android app keeps `unitTests.isIncludeAndroidResources = true`; the older AGP avoids realizing the incompatible release preview tasks.
+
 ### Architecture Changes
 - **Desktop: GStreamer → VLCJ**: Completely replaced GStreamer with VLCJ for desktop audio playback
 - **DEB/RPM builds removed**: Desktop Linux now only ships AppImage
