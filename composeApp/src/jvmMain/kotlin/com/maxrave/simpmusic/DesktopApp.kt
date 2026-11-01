@@ -87,6 +87,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.io.File
 import java.security.MessageDigest
+import java.util.prefs.Preferences
 import javax.swing.Timer
 
 private const val SENTRY_APP_OPEN = "app.open"
@@ -275,10 +276,20 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
 
     governedApplication {
         // Main Window
+        val isWindows = System.getProperty("os.name", "").contains("Windows", ignoreCase = true)
+        val windowPrefs = remember { Preferences.userRoot().node("SimpMusic/MainWindow") }
+        val savedWidth = windowPrefs.getFloat("width", 1500f).coerceAtLeast(400f)
+        val savedHeight = windowPrefs.getFloat("height", 860f).coerceAtLeast(300f)
         val windowState =
             rememberWindowState(
-                size = DpSize(1500.dp, 860.dp),
+                size = DpSize(savedWidth.dp, savedHeight.dp),
             )
+        LaunchedEffect(windowState.placement, windowState.size) {
+            if (isWindows && windowState.placement == androidx.compose.ui.window.WindowPlacement.Floating) {
+                windowPrefs.putFloat("width", windowState.size.width.value)
+                windowPrefs.putFloat("height", windowState.size.height.value)
+            }
+        }
         var isVisible by remember { mutableStateOf(true) }
         val showNotificationPermissionDialog by
             desktopNotificationManager.shouldShowPermissionDialog.collectAsState()
@@ -348,7 +359,6 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
         }
         // Linux keeps the native title bar because undecorated + transparent breaks on some
         // distros/WMs. Windows and macOS use the custom title bar.
-        val isWindows = System.getProperty("os.name", "").contains("Windows", ignoreCase = true)
         val nativeTitleBar = !isMacOS && !isWindows
         // Publish whether the custom title bar will be mounted so getScreenSizeInfo() can
         // subtract the 40dp strip it occupies above the content (see DesktopWindowChrome).
