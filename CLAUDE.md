@@ -169,6 +169,8 @@ Service modules:
 
 ## 📝 Development Guidelines
 
+IMPORTANT: When applicable, prefer using android-studio-index MCP tools for code navigation and refactoring.
+
 ### Code Style
 - **Kotlin coding conventions**: Follow Kotlin official guidelines
 - **Compose best practices**: Single source of truth, unidirectional data flow
