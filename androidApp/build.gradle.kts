@@ -14,8 +14,6 @@ plugins {
 }
 
 android {
-    val abis = arrayOf("arm64-v8a")
-
     namespace = "com.maxrave.simpmusic"
     compileSdk = 37
 
@@ -89,14 +87,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            splits {
-                abi {
-                    isEnable = true
-                    reset()
-                    isUniversalApk = false
-                    include(*abis)
-                }
-            }
         }
         debug {
             isMinifyEnabled = false
