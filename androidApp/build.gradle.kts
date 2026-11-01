@@ -111,9 +111,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
-    }
     // enable view binding
     buildFeatures {
         viewBinding = true
