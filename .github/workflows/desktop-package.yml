@@ -1,4 +1,4 @@
-name: Build desktop Windows package
+name: Build desktop packages (FOSS)
 
 on:
   workflow_dispatch:
@@ -17,8 +17,8 @@ permissions:
   contents: write
 
 jobs:
-  build-desktop-windows:
-    name: Build desktop Windows package
+  build-desktop-packages:
+    name: Build desktop packages (Linux + Windows)
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -34,6 +34,9 @@ jobs:
           java-version: 21
           distribution: microsoft
           cache: gradle
+
+      - name: Install Linux packaging dependencies
+        run: sudo apt-get update && sudo apt-get install -y libfuse2
 
       - name: Update build product flavor
         run: |
@@ -56,11 +59,21 @@ jobs:
           path: mpv-natives
           key: mpv-natives-${{ hashFiles('composeApp/build.gradle.kts') }}
 
-      - name: Populate Windows mpv natives
+      - name: Populate desktop mpv natives
         run: ./gradlew :composeApp:mpvSetupAll --no-configuration-cache
 
       - name: Generate Conveyor config
         run: ./gradlew :desktopApp:writeConveyorConfig --no-configuration-cache
+
+      - name: Run Conveyor (Linux app tree)
+        uses: hydraulic-software/conveyor/actions/build@v22.0
+        with:
+          command: '-Kapp.machines=linux.amd64.glibc make linux-app'
+          agree_to_license: 1
+          signing_key: ${{ secrets.CONVEYOR_SIGNING_KEY }}
+
+      - name: Wrap Linux app tree as AppImage
+        run: ./gradlew :desktopApp:packageConveyorAppImage --no-configuration-cache
 
       - name: Run Conveyor (Windows only)
         uses: hydraulic-software/conveyor/actions/build@v22.0
@@ -68,6 +81,12 @@ jobs:
           command: '-Kapp.machines=windows.amd64 make site'
           agree_to_license: 1
           signing_key: ${{ secrets.CONVEYOR_SIGNING_KEY }}
+
+      - name: Stage Linux AppImage
+        run: |
+          mkdir -p installers
+          cp desktopApp/build/appimage/conveyor/SimpMusic-*.AppImage \
+            installers/SimpMusic-Linux-x86_64.AppImage
 
       - name: Bundle Windows offline installer
         run: |
@@ -85,8 +104,8 @@ jobs:
           )
           rm -rf "$stage"
 
-      - name: Upload Windows installer
+      - name: Upload desktop installers
         uses: actions/upload-artifact@v4
         with:
-          name: desktop-windows
-          path: installers/SimpMusic-Windows-installer.zip
+          name: desktop-installers
+          path: installers/*

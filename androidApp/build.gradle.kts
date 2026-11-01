@@ -14,7 +14,7 @@ plugins {
 }
 
 android {
-    val abis = arrayOf("armeabi-v7a", "arm64-v8a", "x86_64")
+    val abis = arrayOf("arm64-v8a")
 
     namespace = "com.maxrave.simpmusic"
     compileSdk = 37
@@ -71,8 +71,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters.add("x86_64")
-            abiFilters.add("armeabi-v7a")
             abiFilters.add("arm64-v8a")
         }
     }
@@ -95,7 +93,7 @@ android {
                 abi {
                     isEnable = true
                     reset()
-                    isUniversalApk = true
+                    isUniversalApk = false
                     include(*abis)
                 }
             }

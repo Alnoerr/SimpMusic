@@ -188,7 +188,7 @@ kotlin {
             // shared JVM UI + expect/actuals and their direct dependencies.
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
-            implementation(libs.sentry.jvm)
+            implementation(project(if (isFullBuild) ":desktop-sentry" else ":desktop-sentry-empty"))
             implementation(libs.native.tray)
             implementation(libs.nucleus.core.runtime)
             implementation(projects.mediaJvmUi)

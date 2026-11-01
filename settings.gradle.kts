@@ -59,6 +59,8 @@ include(
     ":cast-empty",
     ":lastfm",
     ":lastfm-empty",
+    ":desktop-sentry",
+    ":desktop-sentry-empty",
     ":kizzy",
     ":listenTogether",
     ":loginSync",
