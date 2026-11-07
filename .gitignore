@@ -36,6 +36,7 @@ sentry.properties
 /vivoAndroidApp/build/
 /lastfm/build/
 /lastfm-empty/build/
+/desktop-sentry/build/
 # libmpv native libraries (downloaded by `./gradlew :composeApp:mpvSetupAll`)
 /mpv-natives/
 # Agent scratch state. NOT anchored to the repo root: agents drop .omc/ next to

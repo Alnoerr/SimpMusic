@@ -152,11 +152,13 @@ dependencies {
     implementation(libs.easypermissions)
     implementation(libs.legacy.support.v4)
     implementation(libs.coroutines.android)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.glance)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
 
     implementation(projects.composeApp)
+    implementation(projects.lansync)
     implementation(projects.data)
 
     if (isFullBuild) {

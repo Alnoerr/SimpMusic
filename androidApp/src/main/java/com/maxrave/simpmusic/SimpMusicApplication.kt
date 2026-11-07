@@ -7,6 +7,9 @@ import android.os.Build
 import android.util.Log
 import androidx.work.Configuration
 import androidx.work.WorkManager
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import cat.ereza.customactivityoncrash.config.CaocConfig
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -22,12 +25,18 @@ import com.maxrave.data.di.loader.loadAllModules
 import com.maxrave.domain.manager.DataStoreManager
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.di.viewModelModule
+import com.maxrave.simpmusic.di.lanSyncPlatformModule
+import com.maxrave.simpmusic.lansync.LanSyncWorkScheduler
+import lansync.api.LanSyncController
 import com.maxrave.simpmusic.service.backup.AutoBackupScheduler
 import com.maxrave.simpmusic.utils.NetworkFirstInterceptor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import multiplatform.network.cmptoast.AppContext
 import okhttp3.OkHttpClient
 import okio.FileSystem
@@ -51,6 +60,7 @@ class SimpMusicApplication :
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val dataStoreManager: DataStoreManager by inject()
     private lateinit var autoBackupScheduler: AutoBackupScheduler
+    private val lanSyncController: LanSyncController by inject()
 
     override fun onCreate() {
         super.onCreate()
@@ -69,7 +79,7 @@ class SimpMusicApplication :
                     isDevBuild = BuildConfig.DEBUG,
                 ),
             )
-            loadKoinModules(viewModelModule)
+            loadKoinModules(listOf(viewModelModule, lanSyncPlatformModule()))
         }
         // provide custom configuration
         val workConfig =
@@ -80,6 +90,34 @@ class SimpMusicApplication :
 
         // initialize WorkManager
         WorkManager.initialize(this, workConfig)
+
+        applicationScope.launch {
+            lanSyncController.initialize()
+            lanSyncController.state
+                .map { it.enabled }
+                .distinctUntilChanged()
+                .collectLatest { enabled ->
+                    if (enabled) {
+                        LanSyncWorkScheduler.schedule(this@SimpMusicApplication)
+                        LanSyncWorkScheduler.enqueueNow(this@SimpMusicApplication)
+                    } else {
+                        LanSyncWorkScheduler.cancel(this@SimpMusicApplication)
+                    }
+                }
+        }
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onStart(owner: LifecycleOwner) {
+                    applicationScope.launch {
+                        if (lanSyncController.state.value.enabled) {
+                            if (lanSyncController.trustedDevices.value.any { it.autoSync }) {
+                                runCatching { lanSyncController.syncNow() }
+                            }
+                        }
+                    }
+                }
+            },
+        )
 
         // Initialize and start AutoBackupScheduler
         autoBackupScheduler = AutoBackupScheduler(this, dataStoreManager)

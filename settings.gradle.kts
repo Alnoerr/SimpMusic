@@ -64,6 +64,7 @@ include(
     ":kizzy",
     ":listenTogether",
     ":loginSync",
+    ":lansync",
 )
 
 // core modules

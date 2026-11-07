@@ -30,12 +30,13 @@ import coil3.request.CachePolicy
 import coil3.request.crossfade
 import com.maxrave.common.AppIdentity
 import com.maxrave.data.di.loader.loadAllModules
+import com.maxrave.data.io.getHomeFolderPath
 import com.maxrave.domain.manager.DataStoreManager
 import com.maxrave.domain.mediaservice.handler.MediaPlayerHandler
 import com.maxrave.domain.mediaservice.handler.ToastType
 import com.maxrave.domain.notification.DesktopNotificationManager
-import com.maxrave.data.io.getHomeFolderPath
 import com.maxrave.logger.Logger
+import com.maxrave.simpmusic.di.lanSyncPlatformModule
 import com.maxrave.simpmusic.di.viewModelModule
 import com.maxrave.simpmusic.extension.DesktopWindowChrome
 import com.maxrave.simpmusic.ui.component.CustomTitleBar
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import lansync.api.LanSyncController
 import multiplatform.network.cmptoast.ToastHost
 import multiplatform.network.cmptoast.showToast
 import okhttp3.OkHttpClient
@@ -195,8 +197,11 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
                 isDevBuild = System.getProperty("simpmusic.dev") == "true",
             ),
         )
-        loadKoinModules(viewModelModule)
+        loadKoinModules(listOf(viewModelModule, lanSyncPlatformModule()))
     }
+
+    val lanSyncController = getKoin().get<LanSyncController>()
+    runBlocking { lanSyncController.initialize() }
 
     val language =
         runBlocking {

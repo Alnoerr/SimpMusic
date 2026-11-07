@@ -59,6 +59,7 @@ import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 import com.maxrave.simpmusic.ui.theme.typo
 import com.maxrave.simpmusic.viewModel.SharedViewModel
 import kotlinx.coroutines.launch
+import lansync.api.LanSyncController
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -89,8 +90,11 @@ fun CreateActions(
     sharedViewModel: SharedViewModel = koinInject(),
 ) {
     val room by koinInject<ListenTogetherRepository>().room.collectAsStateWithLifecycle()
+    val lanSyncController = koinInject<LanSyncController>()
+    val lanSyncState by lanSyncController.state.collectAsStateWithLifecycle()
     var showCreate by remember { mutableStateOf(false) }
     var showPlaylistName by remember { mutableStateOf(false) }
+    var showLanSync by remember { mutableStateOf(false) }
     val tint = MaterialTheme.colorScheme.onBackground
 
     val createButton: @Composable () -> Unit = {
@@ -117,6 +121,14 @@ fun CreateActions(
             if (room.inRoom) LiveRoomDot()
         }
     }
+    val syncButton: @Composable () -> Unit = {
+        if (onSettings != null) {
+            LanSyncStatusButton(
+                state = lanSyncState,
+                onClick = { showLanSync = true },
+            )
+        }
+    }
     val settingsButton: @Composable () -> Unit = {
         if (onSettings != null) {
             IconButton(onClick = onSettings, modifier = Modifier.size(44.dp)) {
@@ -140,13 +152,22 @@ fun CreateActions(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             createButton()
+            syncButton()
             settingsButton()
         }
     } else {
         Row(verticalAlignment = Alignment.CenterVertically) {
             createButton()
+            syncButton()
             settingsButton()
         }
+    }
+
+    if (showLanSync) {
+        LanSyncPopup(
+            controller = lanSyncController,
+            onDismiss = { showLanSync = false },
+        )
     }
 
     if (showCreate) {

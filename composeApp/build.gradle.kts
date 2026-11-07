@@ -129,6 +129,7 @@ kotlin {
             api(projects.common)
             api(projects.domain)
             implementation(projects.data)
+            implementation(projects.lansync)
 
             // `api` so platform entry points can configure Last.fm through BuildKonfig.
             api(projects.lastfm)

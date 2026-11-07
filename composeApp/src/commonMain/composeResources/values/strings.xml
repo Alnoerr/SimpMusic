@@ -914,6 +914,7 @@
     <string name="month_full_nov">November</string>
     <string name="month_full_dec">December</string>
     <string name="login_sync_section">Devices</string>
+    <string name="synchronization">Synchronization</string>
     <string name="login_sync_desktop_title">Sign in from your phone</string>
     <string name="login_sync_desktop_description">Scan a QR code with SimpMusic on Android to bring your sign-ins here</string>
     <string name="login_sync_android_title">Send sign-ins to desktop</string>
@@ -1066,4 +1067,22 @@
     <string name="recognize_mic_needed">Microphone access needed</string>
     <string name="recognize_mic_hint">SimpMusic listens for a few seconds to find the song playing near you</string>
     <string name="recognize_allow_mic">Allow microphone</string>
+    <string name="lan_sync_title">Synchronization</string>
+    <string name="lan_sync_description">Synchronize favorite songs, favorite playlists, and local playlists on your trusted devices</string>
+    <string name="lan_sync_enable">Enable LAN Sync</string>
+    <string name="lan_sync_status">Status: %1$s</string>
+    <string name="lan_sync_connected_device">Device: %1$s</string>
+    <string name="lan_sync_last_sync">Last sync: %1$s</string>
+    <string name="lan_sync_pending">Pending changes: %1$d</string>
+    <string name="lan_sync_never">Never</string>
+    <string name="lan_sync_pair">Pair Device</string>
+    <string name="lan_sync_sync_now">Sync Now</string>
+    <string name="lan_sync_trusted_devices">Trusted devices</string>
+    <string name="lan_sync_auto">Sync automatically</string>
+    <string name="lan_sync_device_name">Device name</string>
+    <string name="lan_sync_forget">Forget</string>
+    <string name="lan_sync_scan_hint">Scan the LAN pairing code shown by SimpMusic Desktop</string>
+    <string name="lan_sync_confirm_pairing">Pair with %1$s?</string>
+    <string name="lan_sync_trust_checkbox">Trust this device and sync automatically</string>
+    <string name="lan_sync_pair_expires">Scan this code from a device on the same network. Host: %1$s</string>
 </resources>

@@ -1112,6 +1112,19 @@ if (getPlatform() == Platform.Android) {
   - The pass runs in the sheet's composition: closing the sheet cancels it and stops the recording within one buffer, and a rotation starts listening again. `RECORD_AUDIO` is asked from the sheet (Open settings after a permanent denial, the Login Sync camera flow; `openAppSettings()` is now `internal` for it), and the manifest pairs it with `uses-feature android.hardware.microphone required="false"`, since the permission alone implies a required microphone.
   - **Quick Settings tile (2026-10-31)**: `RecognitionTileService` (androidApp `service/`) is a shortcut into the app, not a background recognizer. It opens `MainActivity` at `simpmusic://recognize`; the router calls `requestSongRecognition(true)` and navigates to Search with `launchSingleTop` (a Search already on top takes the request; a second copy would race the one leaving for it), and `SearchScreen` opens the sheet and clears the request, the `libraryTabRequest` pattern. `isAppLinkAvailable` keeps `recognize` Android-only. From Android 14 the tile must call `startActivityAndCollapse(PendingIntent)`, because the `Intent` overload throws `UnsupportedOperationException`; lint (`StartActivityAndCollapseDeprecated`) flags the pre-14 branch whatever the version guard, hence its `@Suppress`. The label and icon are Android resources (`widget_strings.xml`, `rounded_graphic_eq_24.xml`, path copied from `GraphicEq.kt`), since the tile editor reads them before any code runs. Metrolist's tile records in the background instead, through a transparent activity and a microphone foreground service: such a service may start only while an activity is visible, and tiles are not exempt. The owner chose the shortcut.
 
+## 🔄 LAN Synchronization Architecture (Milestones 1–4, 2026-11-05)
+
+- `:lansync` is the in-repository Kotlin Multiplatform replacement path for the experimental AnySync transport. It synchronizes favorite songs only and must stay isolated from playback, YouTube like/unlike calls, downloads, and Room schema changes.
+- Shared code keeps stable song IDs, Lamport versions with device-ID tie-breaking, durable unlike tombstones, an outbox/journal, initial reconciliation, cursor-based incremental pulls, and idempotent operation IDs. Do not create a second engine, conflict resolver, or journal.
+- Desktop is the authenticated LAN host: an embedded Ktor HTTPS/WSS server, persistent self-signed EC identity pinned by SPKI SHA-256, durable ordered host change log, per-device credentials and revocation, plus JmDNS `_simpmusic._tcp.local.` advertisement. There is no external process.
+- Android is the client: Ktor/OkHttp with narrowly pinned TLS verification and platform `NsdManager` discovery. The production app targets SDK 36, so do not request `ACCESS_LOCAL_NETWORK` yet; the API-37 picker/permission path is already guarded by target SDK and extension checks.
+- Pairing QR payloads are versioned `simpmusic-lan://pair/v1?` values. They contain the host identity/fingerprint, reachable endpoint, and a short-lived single-use invitation—never a private key or long-lived credential. The existing CameraX + ZXing account scanner and Desktop ZXing renderer are reused.
+- Credentials are atomically stored under Android `filesDir/lansync/` or Desktop `~/.simpmusic/lansync/`. This relies on OS application-directory access controls and is not hardware-backed or encrypted against a compromised/rooted OS. Android backup already excludes the entire app files domain.
+- The Home sync indicator lives inside `CreateActions`, immediately left of Settings, and reads the real `LanSyncController.state`. Global disable stops discovery/server/engines/work while preserving Room, journals, identities, outbox, and trusted peers.
+- LAN Sync and AnySync must never run concurrently against production favorites. Android cancels AnySync work and stops its session while LAN is enabled; Desktop likewise stops AnySync. Preserve `:anysync`, its files, native artifacts, and account state until real Android↔Desktop migration verification is complete.
+- Background Android reconciliation is bounded unique WorkManager work. A connected-network constraint does not prove LAN host reachability; the worker still authenticates the saved host and retries transient failures. Foreground sessions use WebSocket notifications plus durable HTTP catch-up.
+- Verification must distinguish JVM/compile coverage from real discovery, camera pairing, and Samsung↔Windows Room propagation. Never claim cross-device success unless it was actually observed.
+
 ## 🔄 AGENTS.md Auto-Update Rule (MANDATORY)
 
 After completing any of the following types of changes, the AI agent **MUST** update this AGENTS.md file:
@@ -1136,6 +1149,6 @@ After completing any of the following types of changes, the AI agent **MUST** up
 
 *This document helps AI Agents quickly understand the SimpMusic project. Update regularly when there are major changes to architecture or structure.*
 
-**Last updated**: 2026-10-31
+**Last updated**: 2026-11-05
 **Project version**: Check latest release on GitHub
 **Maintained by**: maxrave-dev and contributors

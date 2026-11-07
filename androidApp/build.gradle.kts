@@ -159,6 +159,7 @@ dependencies {
     implementation(libs.legacy.support.v4)
     // Coroutines
     implementation(libs.coroutines.android)
+    implementation(libs.androidx.lifecycle.process)
 
     // Glance
     implementation(libs.glance)
@@ -167,6 +168,9 @@ dependencies {
 
     implementation(projects.composeApp)
     implementation(projects.data)
+    implementation(projects.lansync)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 
     if (isFullBuild) {
         implementation(projects.crashlytics)
