@@ -128,6 +128,8 @@
     <string name="downloaded_cache">Downloaded Cache</string>
     <string name="cached">Cached</string>
     <string name="remove_from_cache">Remove from cache</string>
+    <string name="remove_download">Remove download</string>
+    <string name="cancel_download">Cancel download</string>
     <string name="thumbnail_cache">Thumbnail Cache</string>
     <string name="backup">Backup</string>
     <string name="backup_your_data">Backup Your Data</string>
@@ -441,6 +443,7 @@
     <string name="now_playing_style_spotify">Classic</string>
     <string name="now_playing_style_m3_expressive" translatable="false">Material 3 Expressive</string>
     <string name="now_playing_style_apple_music" translatable="false">Apple Music</string>
+    <string name="now_playing_style_soundcloud" translatable="false">SoundCloud</string>
     <string name="ai_translated">AI translated</string>
     <string name="lyrics_style">Lyrics style</string>
     <string name="lyrics_style_classic">Classic</string>
@@ -665,6 +668,10 @@
     <string name="lastfm_paste_callback_title">Did not come back automatically?</string>
     <string name="lastfm_paste_callback_hint">Paste the link your browser was redirected to</string>
     <string name="lastfm_paste_callback_confirm">Continue with this link</string>
+    <string name="discord_login_step_1">Open Discord and allow SimpMusic to show what you're listening to.</string>
+    <string name="discord_login_step_2">SimpMusic opens again on its own once you have allowed it.</string>
+    <string name="discord_open_authorize_page">Open Discord</string>
+    <string name="discord_login_failed">Could not log in to Discord. Please try again.</string>
     <string name="logged_in_as">Logged in as %1$s</string>
     <string name="youtube_liked_music">YouTube Liked Music</string>
     <string name="keep_your_youtube_playlist_offline">Keep showing your YouTube playlist when offline</string>
@@ -1022,6 +1029,7 @@
     <string name="comments_load_error">Couldn't load comments</string>
     <string name="comment_post_error">Couldn't post your comment</string>
     <string name="comments_need_channel">Create a YouTube channel to comment</string>
+    <string name="comment_placeholder">Comment…</string>
     <string name="local_playlist">Local playlist</string>
     <string name="create_playlist_description">Build a playlist on this device</string>
     <string name="create_room_description">Start or join a room</string>

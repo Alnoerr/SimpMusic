@@ -62,6 +62,7 @@ include(
     ":desktop-sentry",
     ":desktop-sentry-empty",
     ":kizzy",
+    ":discord",
     ":listenTogether",
     ":loginSync",
     ":lansync",
@@ -80,6 +81,7 @@ project(":lyricsService").projectDir = File(serviceDir, "lyricsService")
 project(":kotlinYtmusicScraper").projectDir = File(serviceDir, "kotlinYtmusicScraper")
 project(":spotify").projectDir = File(serviceDir, "spotify")
 project(":kizzy").projectDir = File(serviceDir, "kizzy")
+project(":discord").projectDir = File(serviceDir, "discord")
 project(":listenTogether").projectDir = File(serviceDir, "listenTogether")
 project(":loginSync").projectDir = File(serviceDir, "loginSync")
 

@@ -131,8 +131,16 @@ kotlin {
             implementation(projects.data)
             implementation(projects.lansync)
 
-            // `api` so platform entry points can configure Last.fm through BuildKonfig.
-            api(projects.lastfm)
+            // Last.fm (gated: real scrobbler for full builds, no-op stub for FOSS builds).
+            // `api` rather than `implementation` so :androidApp can hand it the credentials from
+            // BuildKonfig at startup, the same way it does for Sentry.
+            if (isFullBuild) {
+                api(projects.lastfm)
+            } else {
+                api(projects.lastfmEmpty)
+            }
+            // `api` for the same reason: :androidApp hands it the Discord application id at startup.
+            api(projects.discord)
 
             // Navigation Compose
             implementation(libs.navigation.compose)
@@ -193,6 +201,8 @@ kotlin {
             implementation(libs.native.tray)
             implementation(libs.nucleus.core.runtime)
             implementation(projects.mediaJvmUi)
+            // macOS: hand window drags to the Window Server (ui/component/MacWindowDrag.kt)
+            implementation(libs.jna)
             // Login sync QR code
             implementation(libs.zxing.core)
         }
@@ -755,7 +765,7 @@ val mpvBundleAll by tasks.registering {
  */
 val mpvNativesChecksums =
     mapOf(
-        "linux-x64" to "f583c29531355f83579b9f5509424c659bed2a122624a03d47fb41682afb24c4",
+        "linux-x64" to "ab9957e812f6b27ef28d24b13d38a00b428a6529c87876c1c80d0427d8251d05",
         "macos-arm64" to "e527daac8f6cc196324ea6f0ce54d119d04450af9795ff2856c1891806c1d5e0",
         "macos-x64" to "95170ea54e1f637fdee148a9efd97993c305a92e233b8478d3764fbecce3eb02",
         "windows-x64" to "256f17cf402c7583b8684d5a7cf585ad1b59695469219671f4887b9d8d272a99",
@@ -845,24 +855,34 @@ buildkonfig {
                     "sentryDsn",
                     properties.getProperty("SENTRY_DSN") ?: "",
                 )
+                buildConfigField(
+                    STRING,
+                    "lastfmApiKey",
+                    properties.getProperty("LASTFM_API_KEY") ?: "",
+                )
+                buildConfigField(
+                    STRING,
+                    "lastfmSecret",
+                    properties.getProperty("LASTFM_SECRET") ?: "",
+                )
+                buildConfigField(
+                    STRING,
+                    "discordClientId",
+                    properties.getProperty("DISCORD_CLIENT_ID") ?: "",
+                )
             } else {
                 buildConfigField(STRING, "sentryDsn", "")
+                buildConfigField(STRING, "lastfmApiKey", "")
+                buildConfigField(STRING, "lastfmSecret", "")
+                buildConfigField(STRING, "discordClientId", "")
             }
-            buildConfigField(
-                STRING,
-                "lastfmApiKey",
-                properties.getProperty("LASTFM_API_KEY") ?: "",
-            )
-            buildConfigField(
-                STRING,
-                "lastfmSecret",
-                properties.getProperty("LASTFM_SECRET") ?: "",
-            )
         } catch (e: Exception) {
             println("Failed to load secrets from local.properties: ${e.message}")
             buildConfigField(STRING, "sentryDsn", "")
             buildConfigField(STRING, "lastfmApiKey", "")
             buildConfigField(STRING, "lastfmSecret", "")
+            // No Discord application either, so Rich Presence keeps going through kizzy.
+            buildConfigField(STRING, "discordClientId", "")
         }
     }
 }
