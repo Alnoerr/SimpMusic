@@ -114,26 +114,45 @@ dependencies {
     windowsAmd64(libs.compose.windows.x64)
 }
 
-// Append SimpMusic-specific keys to Conveyor's generated config file and
-// — crucially — replace the auto-detected `app.inputs` classpath with
-// ProGuard's shrunk jars so the packaged AppImage carries
-// obfuscated + size-reduced bytecode instead of raw Gradle output.
-// `dependsOn(proguardReleaseJars)` builds the shrunk jars first.
+// Replace Conveyor's auto-detected classpath with ProGuard's shrunk JARs.
+// Use short staging names to reduce the length of the native launcher's
+// expanded classpath (Conveyor 22.0 has a 16,384-byte arguments limit).
 tasks.named<hydraulic.conveyor.gradle.WriteConveyorConfigTask>("writeConveyorConfig") {
     dependsOn(tasks.named("proguardReleaseJars"))
     val proguardJarsDir = layout.buildDirectory.dir("compose/tmp/main-release/proguard")
+    val conveyorJarsDir = layout.buildDirectory.dir("conveyor/short-jars")
+    outputs.dir(conveyorJarsDir)
+
     doLast {
+        val sourceDir = proguardJarsDir.get().asFile
+        val jars = sourceDir.listFiles { file -> file.isFile && file.extension == "jar" }
+            ?.sortedBy { it.name }
+            ?: throw GradleException("ProGuard JAR directory not found: $sourceDir")
+        if (jars.isEmpty()) {
+            throw GradleException("No ProGuard JARs found in $sourceDir")
+        }
+
+        val stagingDir = conveyorJarsDir.get().asFile
+        if (stagingDir.exists() && !stagingDir.deleteRecursively()) {
+            throw GradleException("Could not clear Conveyor staging directory: $stagingDir")
+        }
+        if (!stagingDir.mkdirs()) {
+            throw GradleException("Could not create Conveyor staging directory: $stagingDir")
+        }
+        jars.forEachIndexed { index, jar ->
+            jar.copyTo(stagingDir.resolve("j%04d.jar".format(index)))
+        }
+        logger.lifecycle("Conveyor: staged ${jars.size} ProGuard JARs with short names")
+
         destination.get().asFile.appendText(
             """
             |app.fsname = simpmusic
             |app.display-name = SimpMusic
             |app.rdns-name = com.maxrave.simpmusic
             |
-            |// Override the Gradle-detected classpath with the ProGuard'd
-            |// jars. The glob keeps the generated input compact while still
-            |// copying every shrunk jar into the app.
+            |// The JAR contents are unchanged; only filenames are shortened.
             |app.inputs = [
-            |    "${proguardJarsDir.get().asFile.absolutePath.replace('\\', '/') + "/*.jar"}"
+            |    "${stagingDir.absolutePath.replace('\\', '/') + "/*.jar"}"
             |]
             """.trimMargin() + "\n",
         )
