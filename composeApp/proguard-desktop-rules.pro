@@ -55,8 +55,13 @@
 -keep class io.ktor.client.engine.cio.** { *; }
 -dontwarn kotlinx.atomicfu.**
 -dontwarn io.netty.**
+-keep class io.netty.util.internal.logging.** { *; }
+-dontwarn org.apache.logging.log4j.**
 -dontwarn com.typesafe.**
 -dontwarn org.slf4j.**
+# Ktor's OpenAPI annotations reference the optional JWT server provider. Desktop does not use
+# Ktor's server stack, so the optional descriptor is intentionally absent from the runtime.
+-dontwarn io.ktor.server.routing.openapi.**
 -dontnote io.ktor.**
 -dontnote org.slf4j.**
 -dontnote kotlinx.serialization.**
