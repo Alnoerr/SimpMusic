@@ -131,8 +131,12 @@ kotlin {
             implementation(projects.data)
             implementation(projects.lansync)
 
-            // `api` so platform entry points can configure Last.fm through BuildKonfig.
+            // Last.fm (gated: real scrobbler for full builds, no-op stub for FOSS builds).
+            // `api` rather than `implementation` so :androidApp can hand it the credentials from
+            // BuildKonfig at startup, the same way it does for Sentry.
             api(projects.lastfm)
+            // `api` for the same reason: :androidApp hands it the Discord application id at startup.
+            api(projects.discord)
 
             // Navigation Compose
             implementation(libs.navigation.compose)
