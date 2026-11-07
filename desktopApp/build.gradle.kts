@@ -116,7 +116,7 @@ dependencies {
 
 // Append SimpMusic-specific keys to Conveyor's generated config file and
 // — crucially — replace the auto-detected `app.inputs` classpath with
-// ProGuard's shrunk jar directory so the packaged AppImage carries
+// ProGuard's shrunk jars so the packaged AppImage carries
 // obfuscated + size-reduced bytecode instead of raw Gradle output.
 // `dependsOn(proguardReleaseJars)` builds the shrunk jars first.
 tasks.named<hydraulic.conveyor.gradle.WriteConveyorConfigTask>("writeConveyorConfig") {
@@ -130,12 +130,10 @@ tasks.named<hydraulic.conveyor.gradle.WriteConveyorConfigTask>("writeConveyorCon
             |app.rdns-name = com.maxrave.simpmusic
             |
             |// Override the Gradle-detected classpath with the ProGuard'd
-            |// jar directory. Conveyor expands a directory entry to every
-            |// file inside it — saves ~750 MB raw / ~100 MB compressed in
-            |// the resulting AppImage by replacing 221 raw jars with the
-            |// shrunk equivalents from compose.desktop's proguard task.
+            |// jars. The glob keeps the generated input compact while still
+            |// copying every shrunk jar into the app.
             |app.inputs = [
-            |    "${proguardJarsDir.get().asFile.absolutePath}"
+            |    "${proguardJarsDir.get().asFile.absolutePath.replace('\\', '/') + "/*.jar"}"
             |]
             """.trimMargin() + "\n",
         )
