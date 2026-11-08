@@ -1,25 +1,6 @@
 name: Build release APK (FOSS)
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'dev-tweaks'
-    paths-ignore:
-      - 'README.md'
-      - 'fastlane/**'
-      - 'assets/**'
-      - '.github/**/*.md'
-      - '.github/FUNDING.yml'
-      - '.github/ISSUE_TEMPLATE/**'
-  pull_request:
-    branches: [ dev-tweaks ]
-    paths-ignore:
-      - 'README.md'
-      - 'fastlane/**'
-      - 'assets/**'
-      - '.github/**/*.md'
-      - '.github/FUNDING.yml'
-      - '.github/ISSUE_TEMPLATE/**'
 
 jobs:
   build:

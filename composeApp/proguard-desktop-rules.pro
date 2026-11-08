@@ -55,6 +55,7 @@
 -keep class io.ktor.client.engine.cio.** { *; }
 -dontwarn kotlinx.atomicfu.**
 -dontwarn io.netty.**
+-keep class io.netty.** { *; }
 -keep class io.netty.util.internal.logging.** { *; }
 -dontwarn org.apache.logging.log4j.**
 -dontwarn com.typesafe.**
